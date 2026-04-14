@@ -1236,6 +1236,7 @@ function renderTodayPage(){
         <div class="chap-body">
           <div class="chap-name">${esc(e.subject)} — ${e.chapRange}
             ${e.isStacked?'<span class="pill pill-stacked">↩ Carried Over</span>':''}
+            ${e.isPulledForward?'<span class="pill" style="background:rgba(6,182,212,.15);color:#06B6D4">📥 Pulled Forward</span>':''}
             ${isDone(e)?'<span style="color:var(--green);font-weight:600;font-size:11px">✓ Done</span>':''}
           </div>
           ${buildChapterDiffLines(e)}
@@ -1334,8 +1335,19 @@ function renderTodayPage(){
 
 function toggleTask(id, checked){
   setDone(id, checked);
+
+  // ── Auto-fill: if a future-day task was just completed, pull in a
+  //    replacement task of equal difficulty from further in the schedule.
+  if(checked && planData){
+    const entry=planData.allEntries.find(e=>e.id===id);
+    if(entry && entry.dateStr > todayStr()){
+      autoFillFutureSlot(entry);
+    }
+  }
+
   renderTodayPage();
   renderDashboard();
+  renderPlanTables();
   // Also update the study plan row if it exists there (for strikethrough sync)
   const planRow=document.getElementById('planrow-'+id);
   if(planRow){
@@ -1355,6 +1367,41 @@ function toggleTask(id, checked){
       if(lbl) lbl.remove();
     }
   }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO-FILL FUTURE SLOT
+// When a task from a future day is completed early, pull in the next
+// unfinished task of equal difficulty to fill the now-empty slot.
+// ═══════════════════════════════════════════════════════════
+function autoFillFutureSlot(completedEntry){
+  if(!planData) return;
+
+  const slotDate   = completedEntry.dateStr;
+  const targetDiff = completedEntry.difficulty;
+  const targetType = completedEntry.type; // 'study' or 'revision'
+
+  // Find the next unfinished task of the same difficulty that is
+  // scheduled strictly AFTER the slot date.
+  const replacement = planData.allEntries.find(e =>
+    e.dateStr > slotDate &&
+    !isDone(e) &&
+    e.difficulty === targetDiff &&
+    e.type === targetType
+  );
+
+  if(!replacement) return; // nothing available — no-op
+
+  // ── Pull it into the freed slot ─────────────────────────
+  const newLabel = new Date(slotDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  replacement.dateStr  = slotDate;
+  replacement.dayLabel = newLabel;
+  replacement.isPulledForward = true; // mark so we can badge it
+
+  planData.allEntries.sort((a,b)=>a.dateStr.localeCompare(b.dateStr));
+  save();
+
+  showToast(`📥 Pulled in: "${replacement.subject} — ${replacement.chapRange}" to fill the ${targetDiff} slot on ${newLabel}`);
 }
 
 function markAllToday(done){
