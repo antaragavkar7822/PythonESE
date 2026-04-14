@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyPlan — Smart Study Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F0F4FF;
+  --surface:#FFFFFF;
+  --surface2:#EEF1FB;
+  --surface3:#E4E9F8;
+  --border:#D6DCF0;
+  --border2:#BEC8E8;
+  --text:#1E2140;
+  --muted:#7A84AA;
+  --accent:#6C5CE7;
+  --accent2:#4C3FBF;
+  --accent-glow:rgba(108,92,231,0.15);
+  --easy:#16A34A;
+  --easy-bg:rgba(22,163,74,0.10);
+  --medium:#D97706;
+  --medium-bg:rgba(217,119,6,0.10);
+  --hard:#DC2626;
+  --hard-bg:rgba(220,38,38,0.10);
+  --green:#16A34A;
+  --green-bg:rgba(22,163,74,0.10);
+  --amber:#D97706;
+  --amber-bg:rgba(217,119,6,0.10);
+  --red:#DC2626;
+  --red-bg:rgba(220,38,38,0.10);
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow:0 4px 24px rgba(108,92,231,0.10);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--surface2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* TOPBAR */
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(108,92,231,0.08)}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:18px;font-weight:700;min-width:200px;letter-spacing:-.3px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#5D4ECC);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;font-family:'DM Mono',monospace;box-shadow:0 0 16px var(--accent-glow)}
+.badge{background:linear-gradient(135deg,var(--accent),#5D4ECC);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;font-family:'DM Mono',monospace}
+.topbar-center{flex:1;display:flex;justify-content:center}
+.topbar-date{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.date-nav{display:flex;align-items:center;gap:8px}
+.date-nav-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;font-weight:700;flex-shrink:0}
+.date-nav-btn:hover{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+.date-nav-btn.disabled{opacity:.35;cursor:default;pointer-events:none}
+.date-nav-label{font-size:12px;color:var(--text);font-family:'DM Mono',monospace;text-align:center;min-width:170px;white-space:nowrap}
+.date-nav-sub{font-size:10px;color:var(--accent);font-family:'DM Mono',monospace;display:block;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#5D4ECC);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.clear-btn-top{padding:6px 14px;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--red);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.clear-btn-top:hover{background:var(--red-bg);border-color:var(--red)}
+
+/* SHELL */
+.shell{display:flex;height:calc(100vh - 60px)}
+.sidenav{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px;overflow-y:auto}
+.nav-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;padding:10px 12px 6px;font-family:'Syne',sans-serif}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);font-weight:400;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent);font-weight:500;border:1px solid rgba(124,106,245,0.2)}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:'DM Mono',monospace}
+.nav-divider{height:1px;background:var(--border);margin:10px 8px}
+.nav-spacer{flex:1}
+.gen-btn{margin:6px;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;font-family:'Syne',sans-serif;box-shadow:0 4px 16px var(--accent-glow)}
+.gen-btn:hover{box-shadow:0 6px 24px rgba(124,106,245,.35);transform:translateY(-1px)}
+.gen-btn svg{width:15px;height:15px}
+
+.main{flex:1;overflow-y:auto;padding:28px 32px}
+.page{display:none}.page.active{display:block}
+.page-hdr{margin-bottom:24px}
+.page-hdr h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.page-hdr p{font-size:13px;color:var(--muted)}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--border2)}
+.stat-val{font-size:28px;font-weight:700;font-family:'DM Mono',monospace}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:5px;font-weight:500;text-transform:uppercase;letter-spacing:.8px}
+.stat-card.blue .stat-val{color:var(--accent)}
+.stat-card.green .stat-val{color:var(--green)}
+.stat-card.amber .stat-val{color:var(--amber)}
+.stat-card.red .stat-val{color:var(--red)}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif}
+.card-title svg{width:16px;height:16px;color:var(--accent)}
+.chart-wrap{position:relative;width:100%;height:220px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-family:'Syne',sans-serif}
+.input{padding:10px 14px;border:1px solid var(--border2);border-radius:8px;font-size:14px;color:var(--text);background:var(--surface2);outline:none;transition:all .15s;font-family:inherit;width:100%}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.input option{background:var(--surface2)}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236B7099' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:18px;padding-right:32px}
+
+/* DIFF SELECTOR */
+.diff-selector{display:flex;gap:8px;margin-top:2px}
+.diff-btn{flex:1;padding:9px 8px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;text-align:center;letter-spacing:.3px}
+.diff-btn:hover{border-color:var(--border2);color:var(--text)}
+.diff-btn.easy.active{background:var(--easy-bg);border-color:var(--easy);color:var(--easy)}
+.diff-btn.medium.active{background:var(--medium-bg);border-color:var(--medium);color:var(--medium)}
+.diff-btn.hard.active{background:var(--hard-bg);border-color:var(--hard);color:var(--hard)}
+
+/* CHAPTER DIFFICULTY CONFIG */
+.chap-diff-grid{display:grid;gap:6px;margin-top:10px}
+.chap-diff-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.chap-diff-row label{font-size:12px;color:var(--muted);min-width:80px;font-weight:500}
+.chap-diff-mini{display:flex;gap:5px}
+.chap-diff-mini button{padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .1s;font-family:'Syne',sans-serif}
+.chap-diff-mini button.easy.active{background:var(--easy-bg);border-color:var(--easy);color:var(--easy)}
+.chap-diff-mini button.medium.active{background:var(--medium-bg);border-color:var(--medium);color:var(--medium)}
+.chap-diff-mini button.hard.active{background:var(--hard-bg);border-color:var(--hard);color:var(--hard)}
+
+.btn-primary{padding:10px 22px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 12px var(--accent-glow)}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(124,106,245,.35);transform:translateY(-1px)}
+.btn-ghost{padding:8px 16px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-ghost:hover{background:var(--surface3)}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:6px}
+
+/* SUBJECT ITEM */
+.subject-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);margin-bottom:9px;transition:border-color .15s}
+.subject-item:hover{border-color:var(--border2)}
+.subj-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.subj-info{flex:1}
+.subj-name{font-weight:600;font-size:14px;font-family:'Syne',sans-serif}
+.subj-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.subj-actions{display:flex;gap:6px}
+.icon-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.icon-btn:hover{background:var(--surface2);border-color:var(--border2)}
+.icon-btn svg{width:14px;height:14px;color:var(--muted)}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:'Syne',sans-serif;letter-spacing:.3px}
+.pill-hard{background:var(--hard-bg);color:var(--hard)}
+.pill-medium{background:var(--medium-bg);color:var(--medium)}
+.pill-easy{background:var(--easy-bg);color:var(--easy)}
+.pill-stacked{background:var(--amber-bg);color:var(--amber)}
+
+/* TABS */
+.tab-bar{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+.tab-btn{padding:9px 18px;border:none;background:none;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Syne',sans-serif;transition:all .15s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.empty{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty-icon{font-size:42px;margin-bottom:14px;opacity:.4}
+.empty p{font-size:14px}
+
+/* TODAY PAGE */
+.today-panel{border:2px solid rgba(124,106,245,.3);border-radius:var(--radius);padding:22px;margin-bottom:18px;background:linear-gradient(135deg,rgba(124,106,245,.08) 0%,var(--surface) 60%)}
+.today-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.today-panel-title{font-size:15px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif}
+.today-panel-title svg{width:17px;height:17px}
+.today-progress-row{display:flex;align-items:center;gap:20px;margin-bottom:16px}
+.ring-wrap{position:relative;width:70px;height:70px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:6}
+.ring-fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1)}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace}
+.today-stats strong{font-size:20px;font-weight:700;display:block;font-family:'Syne',sans-serif}
+.today-stats p{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* DAY END BUTTON */
+.day-end-section{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;margin-top:8px}
+.day-end-section svg{width:16px;height:16px;color:var(--amber);flex-shrink:0}
+.day-end-section p{flex:1;font-size:13px;color:var(--muted)}
+.day-complete-bar{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--green-bg);border:1px solid rgba(34,197,94,.3);border-radius:10px;margin-top:8px;font-size:13px;color:var(--green);font-weight:600}
+.day-complete-bar svg{width:18px;height:18px}
+
+/* NEXT DAY PREVIEW */
+.next-day-panel{border:2px solid rgba(22,163,74,.25);border-radius:var(--radius);padding:22px;margin-top:20px;background:linear-gradient(135deg,rgba(22,163,74,.06) 0%,var(--surface) 60%);display:none}
+.next-day-panel.visible{display:block}
+.next-day-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.next-day-title{font-size:15px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif}
+.next-day-title svg{width:17px;height:17px}
+.next-day-date{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.next-day-note{font-size:12px;color:var(--green);background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);border-radius:8px;padding:8px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.next-day-note svg{width:14px;height:14px;flex-shrink:0}
+
+/* CHAPTER ROW */
+.chap-row{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--surface2);transition:all .2s}
+.chap-row.done{background:var(--surface);border-color:rgba(34,197,94,.2);opacity:.7}
+.chap-row.done .chap-name{text-decoration:line-through;color:var(--muted)}
+.chap-row.is-stacked{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.05)}
+.chap-cb{width:20px;height:20px;border-radius:6px;border:2px solid var(--border2);cursor:pointer;flex-shrink:0;appearance:none;transition:all .15s;position:relative;background:var(--surface);margin-top:1px}
+.chap-cb:checked{background:var(--green);border-color:var(--green)}
+.chap-cb:checked::after{content:'✓';position:absolute;top:-2px;left:3px;color:#fff;font-size:13px;font-weight:700;line-height:1}
+.chap-cb:hover:not(:checked){border-color:var(--accent)}
+.chap-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.chap-body{flex:1;min-width:0}
+.chap-name{font-size:13px;font-weight:600;font-family:'Syne',sans-serif}
+.chap-sub{font-size:11px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:20px}
+.chap-type-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:10px;flex-shrink:0;font-family:'Syne',sans-serif;letter-spacing:.3px}
+.chap-type-badge.study{background:rgba(124,106,245,.15);color:var(--accent)}
+.chap-type-badge.revision{background:rgba(139,92,246,.15);color:#8B5CF6}
+.chap-type-badge.stacked{background:var(--amber-bg);color:var(--amber)}
+.chap-type-badge.pending{background:var(--amber-bg);color:var(--amber)}
+
+/* CHAPTER DIFF LIST */
+.ch-diff-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.ch-diff-item{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 8px}
+.ch-diff-item .ch-num{font-weight:600;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;white-space:nowrap}
+.ch-diff-item .pill{font-size:9px;padding:1px 6px}
+
+/* DAILY TRACKER */
+.daily-tracker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.tracker-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.tracker-title{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text)}
+.tracker-days{display:flex;flex-direction:row;gap:6px;overflow-x:auto;padding-bottom:6px}
+.tracker-day{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;position:relative;flex-shrink:0;min-width:62px}
+.tracker-day:hover{border-color:var(--border2)}
+.tracker-day.today-day{border-color:rgba(124,106,245,.4);background:var(--accent-glow)}
+.tracker-day.completed-day{background:var(--green-bg);border-color:rgba(34,197,94,.3)}
+.tracker-day-label{font-size:10px;color:var(--muted);font-family:'Syne',sans-serif;font-weight:600}
+.tracker-day-num{font-size:14px;font-weight:700;font-family:'DM Mono',monospace}
+.tracker-day-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);appearance:none;cursor:pointer;transition:all .15s;flex-shrink:0}
+.tracker-day-check:checked{background:var(--green);border-color:var(--green)}
+.tracker-day-check:checked::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700}
+.completed-tick{color:var(--green);font-size:14px;font-weight:700}
+.carryover-notice{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:var(--amber);display:none;align-items:center;gap:8px}
+.carryover-notice svg{width:14px;height:14px;flex-shrink:0}
+
+/* PLAN VIEW */
+.day-block{margin-bottom:24px}
+.day-block-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.day-lbl{font-weight:700;font-size:14px;font-family:'Syne',sans-serif}
+.day-tag{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;font-family:'Syne',sans-serif;letter-spacing:.3px}
+.day-tag.today{background:rgba(124,106,245,.15);color:var(--accent)}
+.day-tag.past{background:var(--surface2);color:var(--muted)}
+.day-tag.future{background:var(--green-bg);color:var(--green)}
+.stacked-tag{display:inline-flex;align-items:center;gap:4px;background:var(--amber-bg);color:var(--amber);font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;font-family:'Syne',sans-serif}
+.stacked-tag svg{width:11px;height:11px}
+
+/* PENDING */
+.pending-card{border:1px solid rgba(245,158,11,.3);border-radius:var(--radius);padding:20px;background:rgba(245,158,11,.05);margin-top:16px}
+.pending-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pending-title{font-size:14px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif}
+.pending-title svg{width:16px;height:16px}
+
+/* DEADLINE STRIP */
+.deadline-strip{background:var(--red-bg);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:var(--red);font-weight:500}
+.deadline-strip svg{width:16px;height:16px;flex-shrink:0}
+
+/* INSIGHT */
+.insight{border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:13px;border-left:3px solid}
+.insight.info{background:rgba(139,92,246,.1);border-color:#8B5CF6;color:#C4B5FD}
+.insight.warn{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.insight.error{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.insight.success{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.insight.tip{background:rgba(124,106,245,.1);border-color:var(--accent);color:var(--accent)}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(500px,92vw);max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:20px;font-family:'Syne',sans-serif}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:768px){.shell{flex-direction:column}.sidenav{width:100%;height:auto;flex-direction:row;padding:8px;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border)}.sidenav .nav-lbl,.nav-divider,.nav-spacer,.gen-btn{display:none}.nav-item{white-space:nowrap;min-width:auto}.main{padding:16px}.stat-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">SP</div>
+    StudyPlan
+    <span class="badge">SMART</span>
+  </div>
+  <div class="topbar-center">
+    <div class="date-nav">
+      <button class="date-nav-btn" id="datePrevBtn" onclick="shiftDate(-1)" title="Previous day">&#8249;</button>
+      <div style="text-align:center">
+        <span class="date-nav-label" id="topDate"></span>
+        <span class="date-nav-sub" id="dateOffsetLbl" style="display:none"></span>
+      </div>
+      <button class="date-nav-btn" id="dateNextBtn" onclick="shiftDate(1)" title="Next day">&#8250;</button>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="clear-btn-top" onclick="confirmClear()">🗑 Clear All</button>
+    <div class="avatar">U</div>
+  </div>
+</div>
+
+<div class="shell">
+<nav class="sidenav">
+  <span class="nav-lbl">Study</span>
+  <button class="nav-item active" onclick="showPage('dashboard',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+  </button>
+  <button class="nav-item" onclick="showPage('today',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Today's Tasks
+    <span class="nav-badge" id="todayBadge" style="display:none">0</span>
+  </button>
+  <button class="nav-item" onclick="showPage('tracker',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Daily Tracker
+  </button>
+  <button class="nav-item" onclick="showPage('subjects',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>Subjects
+    <span class="nav-badge" id="subjBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="showPage('plan',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Study Plan
+  </button>
+  <button class="nav-item" onclick="showPage('insights',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Insights
+    <span class="nav-badge" id="insightBadge" style="display:none">!</span>
+  </button>
+  <div class="nav-divider"></div>
+  <div class="nav-spacer"></div>
+  <button class="gen-btn" onclick="generatePlan()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Generate Plan
+  </button>
+</nav>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-hdr"><h1>Dashboard</h1><p>Your exam overview and study progress</p></div>
+  <div id="dashNoData" class="card" style="text-align:center;padding:48px">
+    <div class="empty-icon">📚</div>
+    <p style="font-weight:600;font-size:15px;margin-bottom:6px;font-family:'Syne',sans-serif">No subjects added yet</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Add subjects and generate a plan to see your dashboard</p>
+    <button class="btn-primary" onclick="showPage('subjects',document.querySelectorAll('.nav-item')[3])">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Subject
+    </button>
+  </div>
+  <div id="dashContent" style="display:none">
+    <div id="deadlineWarnings"></div>
+    <div class="stat-grid">
+      <div class="stat-card blue"><div class="stat-val" id="statSubjects">0</div><div class="stat-lbl">Subjects</div></div>
+      <div class="stat-card amber"><div class="stat-val" id="statExamDays">—</div><div class="stat-lbl">Next Exam In</div></div>
+      <div class="stat-card green"><div class="stat-val" id="statChapDone">0</div><div class="stat-lbl">Tasks Done Today</div></div>
+      <div class="stat-card red"><div class="stat-val" id="statUrgent">0</div><div class="stat-lbl">Urgent Subjects</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Study Load by Day</div></div>
+        <div class="chart-wrap"><canvas id="chartLoad"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Subject Priority</div></div>
+        <div class="chart-wrap"><canvas id="chartPriority"></canvas></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Upcoming Exams</div></div>
+        <div id="upcomingExams"></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Chapter Difficulty Breakdown</div></div>
+        <div id="syllabusCoverage"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TODAY'S TASKS -->
+<div class="page" id="page-today">
+  <div class="page-hdr"><h1>Today's Tasks</h1><p>Tick off each task as you complete it — unfinished tasks carry over automatically</p></div>
+  <div id="todayNoData" class="card" style="text-align:center;padding:48px">
+    <div class="empty-icon">🗓️</div>
+    <p style="font-weight:600;font-size:15px;margin-bottom:6px;font-family:'Syne',sans-serif">No plan generated yet</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Add subjects and click "Generate Plan"</p>
+    <button class="btn-primary" onclick="generatePlan()">Generate Plan</button>
+  </div>
+  <div id="todayContent" style="display:none">
+    <div class="today-panel">
+      <div class="today-panel-hdr">
+        <div class="today-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Today's Progress
+        </div>
+        <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace" id="todayDateLbl"></span>
+      </div>
+      <div class="today-progress-row">
+        <div class="ring-wrap">
+          <svg width="70" height="70" viewBox="0 0 70 70">
+            <circle class="ring-bg" cx="35" cy="35" r="28"/>
+            <circle class="ring-fill" id="ringFill" cx="35" cy="35" r="28" stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+          </svg>
+          <div class="ring-pct" id="ringPct">0%</div>
+        </div>
+        <div class="today-stats">
+          <strong id="todayDoneCount">0 / 0 tasks</strong>
+          <p id="todaySubtitle">Let's get started!</p>
+        </div>
+        <div style="margin-left:auto">
+          <button class="btn-ghost btn-sm" onclick="markAllToday(true)" style="font-size:12px">✓ Mark All Done</button>
+        </div>
+      </div>
+      <div id="todayActionBar"></div>
+    </div>
+
+    <!-- TODAY CHECKLIST -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hdr">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          Tasks for Today
+        </div>
+        <span style="font-size:12px;color:var(--muted)">Tick off as you finish each one</span>
+      </div>
+      <div id="todayChecklist"></div>
+    </div>
+
+    <!-- PENDING / CARRYOVER -->
+    <div id="pendingSection" style="display:none">
+      <div class="pending-card">
+        <div class="pending-hdr">
+          <div class="pending-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Carried Over from Previous Day
+          </div>
+          <span id="pendingCountLbl" style="font-size:12px;color:var(--amber)"></span>
+        </div>
+        <div id="pendingChecklist"></div>
+      </div>
+    </div>
+
+    <!-- NEXT DAY PREVIEW (shown when today is 100% done) -->
+    <div class="next-day-panel" id="nextDayPanel">
+      <div class="next-day-hdr">
+        <div class="next-day-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          🎉 Today Complete! Here's Tomorrow →
+        </div>
+        <span class="next-day-date" id="nextDayDateLbl"></span>
+      </div>
+      <div class="next-day-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Great work! You've finished all of today's tasks. Get a head start on tomorrow's schedule below.
+      </div>
+      <div id="nextDayChecklist"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY TRACKER PAGE -->
+<div class="page" id="page-tracker">
+  <div class="page-hdr"><h1>Daily Tracker</h1><p>Mark a day as ended — any remaining tasks will automatically carry over to the next day</p></div>
+  <div id="trackerNoData" class="card" style="text-align:center;padding:48px">
+    <div class="empty-icon">📅</div>
+    <p style="font-weight:600;font-size:15px;margin-bottom:6px;font-family:'Syne',sans-serif">Generate a plan first</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Your daily tracking calendar will appear here</p>
+    <button class="btn-primary" onclick="generatePlan()">Generate Plan</button>
+  </div>
+  <div id="trackerContent" style="display:none">
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-hdr">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          This Week's Calendar
+        </div>
+        <span id="weekLabel" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"></span>
+      </div>
+      <div id="weeklyTracker" class="tracker-days"></div>
+      <div class="carryover-notice" id="carryoverNotice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="carryoverMsg"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Day-by-Day Summary
+        </div>
+      </div>
+      <div id="trackerSummary"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUBJECTS -->
+<div class="page" id="page-subjects">
+  <div class="page-hdr"><h1>Subjects</h1><p>Add subjects and set chapter-level difficulty for smarter planning</p></div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add New Subject</div></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Subject Name</label><input class="input" id="subjectName" placeholder="e.g. Mathematics"/></div>
+      <div class="form-group"><label class="form-label">Exam Date</label><input class="input" type="date" id="examDate"/></div>
+      <div class="form-group"><label class="form-label">Total Chapters</label><input class="input" type="number" id="chapters" min="1" max="100" placeholder="e.g. 12" oninput="buildChapDiffUI()"/></div>
+      <div class="form-group"><label class="form-label">Overall Subject Difficulty</label>
+        <div class="diff-selector">
+          <button class="diff-btn easy active" onclick="selectDiff(this,'easy')">📗 Easy</button>
+          <button class="diff-btn medium" onclick="selectDiff(this,'medium')">📙 Medium</button>
+          <button class="diff-btn hard" onclick="selectDiff(this,'hard')">📕 Hard</button>
+        </div>
+        <input type="hidden" id="difficulty" value="easy"/>
+      </div>
+      <div class="form-group full" id="chapDiffSection" style="display:none">
+        <label class="form-label">Per-Chapter Difficulty <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:11px">(optional — defaults to subject difficulty)</span></label>
+        <div id="chapDiffGrid" class="chap-diff-grid"></div>
+      </div>
+    </div>
+    <div style="margin-top:18px"><button class="btn-primary" onclick="addSubject()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Subject</button></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-hdr"><div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>My Subjects</div></div>
+    <div id="subjectsList"><div class="empty"><div class="empty-icon">📖</div><p>No subjects yet</p></div></div>
+  </div>
+</div>
+
+<!-- PLAN -->
+<div class="page" id="page-plan">
+  <div class="page-hdr"><h1>Study Plan</h1><p>Full schedule — mark tasks done in "Today's Tasks"</p></div>
+  <div id="planNoData" class="card" style="text-align:center;padding:48px">
+    <div class="empty-icon">🗓️</div>
+    <p style="font-weight:600;font-size:15px;margin-bottom:6px;font-family:'Syne',sans-serif">No plan yet</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Add subjects and generate a plan</p>
+    <button class="btn-primary" onclick="generatePlan()">Generate Plan</button>
+  </div>
+  <div id="planContent" style="display:none">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('Study',this)">Study Schedule</button>
+      <button class="tab-btn" onclick="switchTab('Revision',this)">Revision Schedule</button>
+    </div>
+    <div id="tabStudy" class="tab-panel active"><div id="studyPlanList"></div></div>
+    <div id="tabRevision" class="tab-panel"><div id="revPlanList"></div></div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="page" id="page-insights">
+  <div class="page-hdr"><h1>AI Insights</h1><p>Smart recommendations based on your chapter-level plan</p></div>
+  <div id="insightsContent">
+    <div class="card" style="text-align:center;padding:48px">
+      <div class="empty-icon">💡</div>
+      <p style="font-weight:600;font-size:15px;font-family:'Syne',sans-serif">Generate a plan to see insights</p>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <div class="modal-title">Edit Subject</div>
+    <input type="hidden" id="editIdx"/>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Name</label><input class="input" id="editName"/></div>
+      <div class="form-group"><label class="form-label">Exam Date</label><input class="input" type="date" id="editDate"/></div>
+      <div class="form-group"><label class="form-label">Chapters</label><input class="input" type="number" id="editChaps" oninput="buildEditChapDiffUI()"/></div>
+      <div class="form-group"><label class="form-label">Difficulty</label>
+        <div class="diff-selector">
+          <button class="diff-btn easy" onclick="selectEditDiff(this,'easy')">📗 Easy</button>
+          <button class="diff-btn medium" onclick="selectEditDiff(this,'medium')">📙 Medium</button>
+          <button class="diff-btn hard" onclick="selectEditDiff(this,'hard')">📕 Hard</button>
+        </div>
+        <input type="hidden" id="editDiff" value="easy"/>
+      </div>
+      <div class="form-group full" id="editChapDiffSection" style="display:none">
+        <label class="form-label">Per-Chapter Difficulty</label>
+        <div id="editChapDiffGrid" class="chap-diff-grid"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLEAR MODAL -->
+<div class="modal" id="clearModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-title">Clear All Data?</div>
+    <p style="font-size:13px;color:var(--muted)">This removes all subjects, the plan, and all progress. Cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('clearModal')">Cancel</button>
+      <button class="btn-primary" style="background:var(--red);box-shadow:none" onclick="clearAllData()">Yes, Clear Everything</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+// Data always starts fresh on page load — no persistence across sessions
+let subjects   = [];
+let planData   = null;
+let completion = {};
+let dayTracker = {};
+// Removed automatic localStorage clearing to persist data across reloads
+
+const COLORS=['#7C6AF5','#22C55E','#EF4444','#F59E0B','#8B5CF6','#06B6D4','#EC4899','#10B981'];
+const DIFF_MAP={easy:1,medium:2,hard:3};
+const HOURS_PER_CHAPTER={easy:1.5,medium:2.5,hard:4.0};
+let chartLoad=null, chartPriority=null, _eid=0;
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// DATE NAVIGATION
+// ═══════════════════════════════════════════════════════════
+let dateOffset=0; // days offset from real today (0 = real today)
+
+function getActiveDate(){
+  // Returns a Date object for the currently selected date
+  const d=new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+dateOffset);
+  return d;
+}
+
+function updateDateDisplay(){
+  const d=getActiveDate();
+  document.getElementById('topDate').textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const sub=document.getElementById('dateOffsetLbl');
+  const prevBtn=document.getElementById('datePrevBtn');
+  if(dateOffset===0){
+    sub.style.display='none';
+    prevBtn.classList.add('disabled');
+  } else {
+    sub.style.display='block';
+    sub.textContent=dateOffset>0?`+${dateOffset} day${dateOffset>1?'s':''} ahead`:`${dateOffset} day${dateOffset<-1?'s':''} ago`;
+    prevBtn.classList.remove('disabled');
+  }
+}
+
+function shiftDate(delta){
+  if(delta<0&&dateOffset===0) return; // cannot go before real today
+  dateOffset+=delta;
+  updateDateDisplay();
+  // Re-render all data-sensitive pages
+  if(planData){
+    renderTodayPage();
+    renderTrackerPage();
+    renderDashboard();
+    renderPlanTables();
+  }
+}
+
+window.onload=()=>{
+  updateDateDisplay();
+  const minDate=new Date(); minDate.setDate(minDate.getDate()+1);
+  document.getElementById('examDate').min=dStr(minDate);
+  
+  // Restore data from localStorage
+  try {
+    const sl = localStorage.getItem('sp_subjects');
+    if(sl) subjects = JSON.parse(sl);
+    const pl = localStorage.getItem('sp_plan');
+    if(pl) planData = JSON.parse(pl);
+    const cl = localStorage.getItem('sp_completion');
+    if(cl) completion = JSON.parse(cl);
+    const tl = localStorage.getItem('sp_daytracker');
+    if(tl) dayTracker = JSON.parse(tl);
+  } catch(e) {
+    console.error("Failed to parse local storage", e);
+  }
+
+  renderSubjectsList();
+  
+  if(planData) {
+    document.getElementById('subjBadge').textContent = subjects.length;
+    renderDashboard();
+    renderPlanTables();
+    renderTodayPage();
+    renderTrackerPage();
+  }
+};
+
+function save(){
+  localStorage.setItem('sp_subjects',  JSON.stringify(subjects));
+  localStorage.setItem('sp_completion',JSON.stringify(completion));
+  localStorage.setItem('sp_daytracker',JSON.stringify(dayTracker));
+  if(planData) localStorage.setItem('sp_plan',JSON.stringify(planData));
+}
+
+// ═══════════════════════════════════════════════════════════
+// DIFF SELECTOR UI (Add Form)
+// ═══════════════════════════════════════════════════════════
+function selectDiff(btn, val){
+  document.querySelectorAll('#page-subjects .diff-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('difficulty').value=val;
+  // Apply to all chapter rows
+  document.querySelectorAll('#chapDiffGrid .chap-diff-row').forEach(row=>{
+    row.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    const target=row.querySelector(`[data-d="${val}"]`);
+    if(target) target.classList.add('active');
+  });
+}
+
+function buildChapDiffUI(){
+  const n=parseInt(document.getElementById('chapters').value)||0;
+  const sec=document.getElementById('chapDiffSection');
+  const grid=document.getElementById('chapDiffGrid');
+  if(n<1||n>50){sec.style.display='none';return;}
+  sec.style.display='block';
+  const defaultDiff=document.getElementById('difficulty').value||'easy';
+  grid.innerHTML=Array.from({length:n},(_,i)=>`
+    <div class="chap-diff-row">
+      <label>Chapter ${i+1}</label>
+      <div class="chap-diff-mini">
+        <button class="${defaultDiff==='easy'?'easy active':'easy'}" onclick="chapDiffSelect(this,${i},'easy')" data-chap="${i}" data-d="easy">Easy</button>
+        <button class="${defaultDiff==='medium'?'medium active':'medium'}" onclick="chapDiffSelect(this,${i},'medium')" data-chap="${i}" data-d="medium">Medium</button>
+        <button class="${defaultDiff==='hard'?'hard active':'hard'}" onclick="chapDiffSelect(this,${i},'hard')" data-chap="${i}" data-d="hard">Hard</button>
+      </div>
+    </div>`).join('');
+}
+
+function chapDiffSelect(btn,chapIdx,diff){
+  const row=btn.closest('.chap-diff-row');
+  row.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function getChapDiffs(gridId, n, defaultDiff){
+  const grid=document.getElementById(gridId);
+  if(!grid) return Array(n).fill(defaultDiff);
+  const diffs=[];
+  for(let i=0;i<n;i++){
+    const active=grid.querySelector(`[data-chap="${i}"].active`);
+    diffs.push(active?active.dataset.d:defaultDiff);
+  }
+  return diffs;
+}
+
+// ═══════════════════════════════════════════════════════════
+// EDIT DIFF UI
+// ═══════════════════════════════════════════════════════════
+function selectEditDiff(btn,val){
+  document.querySelectorAll('#editModal .diff-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('editDiff').value=val;
+  // Apply to all chapter rows in edit modal
+  document.querySelectorAll('#editChapDiffGrid .chap-diff-row').forEach(row=>{
+    row.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    const target=row.querySelector(`[data-d="${val}"]`);
+    if(target) target.classList.add('active');
+  });
+}
+
+function buildEditChapDiffUI(existingDiffs){
+  const n=parseInt(document.getElementById('editChaps').value)||0;
+  const sec=document.getElementById('editChapDiffSection');
+  const grid=document.getElementById('editChapDiffGrid');
+  if(n<1||n>50){sec.style.display='none';return;}
+  sec.style.display='block';
+  grid.innerHTML=Array.from({length:n},(_,i)=>{
+    const d=(existingDiffs&&existingDiffs[i])||'easy';
+    return `<div class="chap-diff-row">
+      <label>Chapter ${i+1}</label>
+      <div class="chap-diff-mini">
+        <button class="easy${d==='easy'?' active':''}" onclick="editChapDiffSelect(this,${i},'easy')" data-chap="${i}" data-d="easy">Easy</button>
+        <button class="medium${d==='medium'?' active':''}" onclick="editChapDiffSelect(this,${i},'medium')" data-chap="${i}" data-d="medium">Medium</button>
+        <button class="hard${d==='hard'?' active':''}" onclick="editChapDiffSelect(this,${i},'hard')" data-chap="${i}" data-d="hard">Hard</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editChapDiffSelect(btn,chapIdx,diff){
+  const row=btn.closest('.chap-diff-row');
+  row.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CARRY OVER — moves unfinished entries in-place to next day
+// so Study Plan reflects the change too
+// ═══════════════════════════════════════════════════════════
+function carryOverDay(dateStr){
+  if(!planData) return;
+
+  // Find the next calendar day that has existing study entries, or just use +1
+  const futureDates=[...new Set(
+    planData.allEntries
+      .filter(e=>e.dateStr>dateStr)
+      .map(e=>e.dateStr)
+  )].sort();
+  const nextDate=futureDates.length?futureDates[0]:addDays(dateStr,1);
+  const nextLabel=new Date(nextDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+
+  // All unfinished study entries on that day (original + already-stacked)
+  const unfinished=planData.allEntries.filter(e=>
+    e.dateStr===dateStr&&!isDone(e)
+  );
+
+  unfinished.forEach(e=>{
+    e.dateStr=nextDate;
+    e.dayLabel=nextLabel;
+    e.isStacked=true;
+  });
+
+  planData.allEntries.sort((a,b)=>a.dateStr.localeCompare(b.dateStr));
+  save();
+}
+
+function autoStackPastChapters(){
+  if(!planData) return;
+  const tStr=todayStr();
+
+  // Carry over every past day that still has unfinished tasks
+  const pastDates=[...new Set(
+    planData.allEntries
+      .filter(e=>e.dateStr<tStr&&!isDone(e))
+      .map(e=>e.dateStr)
+  )].sort();
+
+  pastDates.forEach(ds=>carryOverDay(ds));
+  if(pastDates.length) save();
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function dStr(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function todayStr(){return dStr(getActiveDate());}
+function addDays(str,n){const d=new Date(str+'T00:00:00');d.setDate(d.getDate()+n);return dStr(d);}
+function fmtDate(s){return new Date(s+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
+function fmtShort(s){return new Date(s+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function calcDaysLeft(dt){const t=new Date();t.setHours(0,0,0,0);return Math.max(Math.ceil((new Date(dt+'T00:00:00')-t)/864e5),1);}
+function calcPriority(diff,dl){let p=(DIFF_MAP[diff]||1)*2+(10/dl);return Math.round(p*100)/100;}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function isDone(e){return !!completion[e.id];}
+function setDone(id,v){completion[id]=v;save();}
+
+let toastTimer;
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg;
+  t.style.borderColor=type==='error'?'rgba(239,68,68,.4)':type==='warn'?'rgba(245,158,11,.4)':'var(--border2)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  if(name==='today') renderTodayPage();
+  if(name==='tracker') renderTrackerPage();
+}
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab'+name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SUBJECTS
+// ═══════════════════════════════════════════════════════════
+function addSubject(){
+  const name=document.getElementById('subjectName').value.trim();
+  const examDate=document.getElementById('examDate').value;
+  const chapters=parseInt(document.getElementById('chapters').value);
+  const difficulty=document.getElementById('difficulty').value;
+
+  if(!name){showToast('Enter subject name','error');return;}
+  if(!examDate){showToast('Select exam date','error');return;}
+  if(!chapters||chapters<1){showToast('Enter valid chapter count','error');return;}
+  const t=new Date();t.setHours(0,0,0,0);
+  if(new Date(examDate+'T00:00:00')<=t){showToast('Exam date must be future','error');return;}
+
+  // Get per-chapter difficulties
+  const chapDiffs = getChapDiffs('chapDiffGrid', chapters, difficulty);
+
+  subjects.push({name,examDate,chapters,difficulty,chapDiffs,colour:COLORS[subjects.length%COLORS.length]});
+  save();
+  ['subjectName','examDate','chapters'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('difficulty').value='easy';
+  document.querySelectorAll('#page-subjects .diff-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains('easy'))b.classList.add('active');});
+  document.getElementById('chapDiffSection').style.display='none';
+  renderSubjectsList();
+  showToast(`✓ "${name}" added!`);
+}
+
+function renderSubjectsList(){
+  const el=document.getElementById('subjectsList');
+  document.getElementById('subjBadge').textContent=subjects.length;
+  if(!subjects.length){el.innerHTML='<div class="empty"><div class="empty-icon">📖</div><p>No subjects yet</p></div>';return;}
+  el.innerHTML=subjects.map((s,i)=>{
+    const dl=calcDaysLeft(s.examDate);const u=dl<=7;
+    const diffCounts={easy:0,medium:0,hard:0};
+    if(s.chapDiffs) s.chapDiffs.forEach(d=>diffCounts[d]=(diffCounts[d]||0)+1);
+    else diffCounts[s.difficulty]=s.chapters;
+    return `<div class="subject-item">
+      <div class="subj-dot" style="background:${s.colour}"></div>
+      <div class="subj-info">
+        <div class="subj-name">${esc(s.name)}</div>
+        <div class="subj-meta">
+          📅 ${fmtDate(s.examDate)} &nbsp;·&nbsp; ${s.chapters} chapters
+          <span style="color:${u?'var(--red)':'var(--muted)'};font-weight:${u?600:400}">${dl} days left</span>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">
+          ${diffCounts.easy?`<span class="pill pill-easy">${diffCounts.easy} Easy</span>`:''}
+          ${diffCounts.medium?`<span class="pill pill-medium">${diffCounts.medium} Medium</span>`:''}
+          ${diffCounts.hard?`<span class="pill pill-hard">${diffCounts.hard} Hard</span>`:''}
+        </div>
+      </div>
+      <div class="subj-actions">
+        <div class="icon-btn" onclick="openEdit(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="icon-btn" onclick="deleteSubject(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteSubject(i){subjects.splice(i,1);save();renderSubjectsList();showToast('Removed');}
+
+function openEdit(i){
+  const s=subjects[i];
+  document.getElementById('editIdx').value=i;
+  document.getElementById('editName').value=s.name;
+  document.getElementById('editDate').value=s.examDate;
+  document.getElementById('editChaps').value=s.chapters;
+  document.getElementById('editDiff').value=s.difficulty;
+  // Set diff buttons
+  document.querySelectorAll('#editModal .diff-btn').forEach(b=>{
+    b.classList.remove('active');
+    if(b.classList.contains(s.difficulty)) b.classList.add('active');
+  });
+  buildEditChapDiffUI(s.chapDiffs);
+  document.getElementById('editModal').classList.add('open');
+}
+
+function saveEdit(){
+  const i=parseInt(document.getElementById('editIdx').value);
+  const chapters=parseInt(document.getElementById('editChaps').value);
+  const difficulty=document.getElementById('editDiff').value;
+  const chapDiffs=getChapDiffs('editChapDiffGrid',chapters,difficulty);
+  subjects[i]={...subjects[i],
+    name:document.getElementById('editName').value.trim(),
+    examDate:document.getElementById('editDate').value,
+    chapters,difficulty,chapDiffs
+  };
+  save();renderSubjectsList();closeModal('editModal');showToast('Subject updated!');
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ═══════════════════════════════════════════════════════════
+// GENERATE PLAN (frontend-only algorithm)
+// ═══════════════════════════════════════════════════════════
+function generatePlan(){
+  if(!subjects.length){showToast('Add at least one subject','error');return;}
+
+  const today=new Date();today.setHours(0,0,0,0);
+  const DAILY_HOURS=6; // total study hours per day
+  const MAX_PER_SUBJECT=3;
+
+  // Enrich subjects
+  const enriched=subjects.map(s=>{
+    const daysLeft=calcDaysLeft(s.examDate);
+    // Compute weighted avg difficulty from per-chapter diffs
+    const chapDiffs=s.chapDiffs||Array(s.chapters).fill(s.difficulty);
+    const avgDiffScore=chapDiffs.reduce((a,d)=>a+(DIFF_MAP[d]||1),0)/chapDiffs.length;
+    const avgDiff=avgDiffScore<=1.33?'easy':avgDiffScore<=2.33?'medium':'hard';
+    const requiredHours=chapDiffs.reduce((a,d)=>a+(HOURS_PER_CHAPTER[d]||2),0);
+    const priority=calcPriority(avgDiff,daysLeft);
+    return {...s,daysLeft,priority,requiredHours,chapDiffs,avgDiff};
+  }).sort((a,b)=>b.priority-a.priority);
+
+  // Build chapter-level tasks
+  const allEntries=[];
+  const today2=new Date();today2.setHours(0,0,0,0);
+  const lastExam=enriched.reduce((mx,s)=>{const d=new Date(s.examDate+'T00:00:00');return d>mx?d:mx;},today2);
+  const totalDays=Math.max(Math.ceil((lastExam-today2)/864e5),0);
+
+  // Work tracker
+  const work=enriched.map(s=>{
+    const chapDiffs=s.chapDiffs||Array(s.chapters).fill(s.difficulty);
+    let pending = Array.from({length: s.chapters}, (_, i) => ({
+      index: i,
+      diff: chapDiffs[i]
+    }));
+    
+    // If not enough time, sort by difficulty (easy -> medium -> hard)
+    if (s.requiredHours > s.daysLeft * MAX_PER_SUBJECT) {
+      pending.sort((a,b) => {
+        const diffA = DIFF_MAP[a.diff] || 1;
+        const diffB = DIFF_MAP[b.diff] || 1;
+        if (diffA !== diffB) return diffA - diffB;
+        return a.index - b.index;
+      });
+    }
+    
+    return {
+      ...s,
+      pendingChapters: pending,
+      hoursRemaining: s.requiredHours,
+    };
+  });
+
+  for(let offset=0;offset<totalDays;offset++){
+    const curDate=new Date(today2);curDate.setDate(today2.getDate()+offset);
+    const dateStr=dStr(curDate);
+    const dayLabel=curDate.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+
+    // Eligible subjects: exam is >0 days away, chapters remaining
+    const eligible=work.filter(s=>{
+      const examD=new Date(s.examDate+'T00:00:00');
+      return (examD-curDate)/864e5>0 && s.pendingChapters.length>0;
+    }).sort((a,b)=>b.priority-a.priority);
+
+    if(!eligible.length) continue;
+
+    let poolHours=DAILY_HOURS;
+
+    for(const subj of eligible){
+      if(poolHours<=0) break;
+      if(subj.pendingChapters.length===0) continue;
+
+      let hoursUsed=0;
+      const scheduledThisBlock=[];
+
+      while(subj.pendingChapters.length>0 && hoursUsed<MAX_PER_SUBJECT && poolHours>0){
+        const chap = subj.pendingChapters[0];
+        const chapHrs = HOURS_PER_CHAPTER[chap.diff]||2;
+        if(hoursUsed+chapHrs>MAX_PER_SUBJECT && hoursUsed>0) break;
+        hoursUsed+=chapHrs;
+        poolHours-=chapHrs;
+        scheduledThisBlock.push(subj.pendingChapters.shift());
+      }
+
+      if(scheduledThisBlock.length>0){
+        const indices = scheduledThisBlock.map(c => c.index + 1);
+        let chapRange = "";
+        
+        let isConsecutive = true;
+        for(let i=1; i<indices.length; i++){
+          if(indices[i] !== indices[i-1]+1){
+            isConsecutive=false;
+            break;
+          }
+        }
+        
+        if(isConsecutive && indices.length > 1){
+          chapRange = `Chapters ${indices[0]}–${indices[indices.length-1]}`;
+        } else if(indices.length === 1){
+          chapRange = `Chapter ${indices[0]}`;
+        } else {
+          chapRange = `Ch ${indices.join(', ')}`;
+        }
+
+        const blockDiffs=scheduledThisBlock.map(c=>c.diff);
+        const hardCount=blockDiffs.filter(d=>d==='hard').length;
+        const medCount=blockDiffs.filter(d=>d==='medium').length;
+        const easyCount=blockDiffs.filter(d=>d==='easy').length;
+
+        allEntries.push({
+          id:`e${++_eid}`,
+          dateStr,dayLabel,
+          subject:subj.name,
+          colour:subj.colour,
+          chapRange,
+          startChap:indices[0],
+          endChap:indices[indices.length-1],
+          chapIndices:indices,
+          chapters:scheduledThisBlock.length,
+          blockDiffs,
+          hardCount,medCount,easyCount,
+          hours:Math.round(hoursUsed*10)/10,
+          difficulty:subj.difficulty,
+          priority:subj.priority,
+          type:'study',
+          isStacked:false,autoStacked:false
+        });
+      }
+    }
+  }
+
+  // Build revision entries (2 days before exam)
+  const revEntries=[];
+  enriched.forEach(s=>{
+    const examD=new Date(s.examDate+'T00:00:00');
+    for(let rb=1;rb<=2;rb++){
+      const revDate=new Date(examD);revDate.setDate(examD.getDate()-rb);
+      if(revDate<today2) continue;
+      const dateStr=dStr(revDate);
+      const dayLabel=revDate.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+      revEntries.push({
+        id:`r${++_eid}`,
+        dateStr,dayLabel,
+        subject:s.name,colour:s.colour,
+        chapRange:'Full Revision',
+        hours:s.difficulty==='hard'?3:s.difficulty==='medium'?2:1.5,
+        difficulty:s.difficulty,
+        type:'revision'
+      });
+    }
+  });
+
+  planData={allEntries: allEntries.concat(revEntries),revEntries,enriched};
+  completion={};
+  save();
+
+  renderDashboard();renderPlanTables();renderInsights();renderTodayPage();renderTrackerPage();
+  showToast('✓ Plan generated!');
+  showPage('today',document.querySelectorAll('.nav-item')[1]);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHAPTER DIFF RENDERER
+// ═══════════════════════════════════════════════════════════
+function buildChapterDiffLines(e){
+  if(!e.blockDiffs) return '';
+  const chips=[];
+  for(let i=0;i<e.blockDiffs.length;i++){
+    const ch=e.chapIndices?e.chapIndices[i]:(e.startChap+i);
+    const d=e.blockDiffs[i];
+    chips.push(`<div class="ch-diff-item">
+      <span class="ch-num">Ch ${ch}</span>
+      <span class="pill pill-${d}">${cap(d)}</span>
+    </div>`);
+  }
+  return chips.length?`<div class="ch-diff-list">${chips.join('')}</div>`:'';
+}
+
+// ═══════════════════════════════════════════════════════════
+// TODAY PAGE
+// ═══════════════════════════════════════════════════════════
+function renderTodayPage(){
+  if(!planData){
+    document.getElementById('todayNoData').style.display='block';
+    document.getElementById('todayContent').style.display='none';
+    return;
+  }
+  document.getElementById('todayNoData').style.display='none';
+  document.getElementById('todayContent').style.display='block';
+
+  const tStr=todayStr();
+
+  // All study and revision entries for today (original + carried over)
+  let todayEntries=planData.allEntries.filter(e=>e.dateStr===tStr&&!e.isStacked);
+  let stackedEntries=planData.allEntries.filter(e=>e.dateStr===tStr&&e.isStacked);
+
+  // ── If today is empty, fall through to the next scheduled day ────────────
+  let activeDate=tStr;
+  let isFallthrough=false;
+  if(!todayEntries.length&&!stackedEntries.length){
+    const futureDates=[...new Set(
+      planData.allEntries
+        .filter(e=>e.dateStr>tStr)
+        .map(e=>e.dateStr)
+    )].sort();
+    if(futureDates.length){
+      activeDate=futureDates[0];
+      isFallthrough=true;
+      todayEntries=planData.allEntries.filter(e=>e.dateStr===activeDate);
+      stackedEntries=[];
+    }
+  }
+
+  // Update date label
+  document.getElementById('todayDateLbl').textContent=
+    isFallthrough
+      ? new Date(activeDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' (Next Scheduled Day)'
+      : fmtDate(tStr);
+
+  // Progress
+  const done=todayEntries.filter(e=>isDone(e)).length+stackedEntries.filter(e=>isDone(e)).length;
+  const total=todayEntries.length+stackedEntries.length;
+  const pct=total?Math.round(done/total*100):0;
+
+  document.getElementById('todayDoneCount').textContent=`${done} / ${total} tasks`;
+  document.getElementById('todaySubtitle').textContent=
+    isFallthrough&&total>0?'No tasks today — showing next scheduled day. Tick ahead!':
+    pct===100?'🎉 All done! Scroll down to preview the next day\'s tasks.':
+    pct>=50?'Halfway there, keep going!':
+    'Start ticking off tasks below!';
+
+  // Update ring
+  const circ=175.9;
+  const fill=document.getElementById('ringFill');
+  fill.style.strokeDashoffset=circ-(circ*(pct/100));
+  document.getElementById('ringPct').textContent=pct+'%';
+
+  // Update badge (today's remaining, or next day's remaining if fallthrough)
+  const remaining=total-done;
+  const badge=document.getElementById('todayBadge');
+  badge.textContent=remaining;
+  badge.style.display=remaining>0?'flex':'none';
+
+  // Render task list
+  const cl=document.getElementById('todayChecklist');
+  if(!todayEntries.length&&!stackedEntries.length){
+    cl.innerHTML='<div class="empty"><div class="empty-icon">✅</div><p>No tasks scheduled — all done!</p></div>';
+  } else {
+    const renderEntry=(e,badge)=>`
+      <div class="chap-row${isDone(e)?' done':''}${e.isStacked?' is-stacked':''}" id="chaprow-${e.id}">
+        <input type="checkbox" class="chap-cb" ${isDone(e)?'checked':''} onchange="toggleTask('${e.id}',this.checked)"/>
+        <div class="chap-dot" style="background:${e.colour}"></div>
+        <div class="chap-body">
+          <div class="chap-name">${esc(e.subject)} — ${e.chapRange}
+            ${e.isStacked?'<span class="pill pill-stacked">↩ Carried Over</span>':''}
+            ${isDone(e)?'<span style="color:var(--green);font-weight:600;font-size:11px">✓ Done</span>':''}
+          </div>
+          ${buildChapterDiffLines(e)}
+        </div>
+        <span class="chap-type-badge ${e.isStacked?'stacked':badge||e.type}">${e.isStacked?'Carryover':badge==='next'?'Next Day':cap(e.type)}</span>
+      </div>`;
+
+    cl.innerHTML=[
+      ...todayEntries.map(e=>renderEntry(e,isFallthrough?'next':null)),
+      ...stackedEntries.map(e=>renderEntry(e,null))
+    ].join('');
+  }
+
+  // Action bar — only show "End Day" for actual today
+  const ab=document.getElementById('todayActionBar');
+  const dayDone=dayTracker[tStr];
+  if(isFallthrough){
+    // No end-day button when showing a future day
+    ab.innerHTML=`<div class="day-end-section">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <p>These are tasks for the next scheduled study day. Tick off anything you finish early!</p>
+    </div>`;
+  } else if(dayDone){
+    ab.innerHTML=`<div class="day-complete-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Day marked as complete! Remaining tasks have been carried to the next scheduled day.
+    </div>`;
+  } else {
+    ab.innerHTML=`<div class="day-end-section">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p>Finished for the day? End the day to carry unfinished tasks forward.</p>
+      <button class="btn-primary btn-sm" onclick="endDay()">End Day →</button>
+    </div>`;
+  }
+
+  // Pending stacked from prev days (not today)
+  const pendingOld=planData.allEntries.filter(e=>e.dateStr<tStr&&e.isStacked&&!isDone(e));
+  const ps=document.getElementById('pendingSection');
+  if(pendingOld.length){
+    ps.style.display='block';
+    document.getElementById('pendingCountLbl').textContent=`${pendingOld.length} task(s) still pending`;
+    document.getElementById('pendingChecklist').innerHTML=pendingOld.map(e=>`
+      <div class="chap-row${isDone(e)?' done':''}" id="chaprow-${e.id}">
+        <input type="checkbox" class="chap-cb" ${isDone(e)?'checked':''} onchange="toggleTask('${e.id}',this.checked)"/>
+        <div class="chap-dot" style="background:${e.colour}"></div>
+        <div class="chap-body">
+          <div class="chap-name">${esc(e.subject)} — ${e.chapRange}</div>
+          <div class="chap-sub">Was scheduled for ${e.dayLabel}</div>
+        </div>
+        <span class="chap-type-badge pending">Pending</span>
+      </div>`).join('');
+  } else {
+    ps.style.display='none';
+  }
+
+  // ── Next Day Preview ──────────────────────────────────────────────────────
+  // Show the day AFTER activeDate when all active tasks are 100% done
+  const nextDayPanel=document.getElementById('nextDayPanel');
+  if(pct===100&&total>0){
+    const futurePool=[...new Set(
+      planData.allEntries
+        .filter(e=>e.dateStr>activeDate)
+        .map(e=>e.dateStr)
+    )].sort();
+    const nextDate=futurePool[0];
+
+    if(nextDate){
+      const nextEntries=planData.allEntries.filter(e=>e.dateStr===nextDate);
+      document.getElementById('nextDayDateLbl').textContent=
+        new Date(nextDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+
+      const renderNextEntry=e=>`
+        <div class="chap-row${isDone(e)?' done':''}" id="chaprow-${e.id}" style="opacity:${isDone(e)?'0.6':'0.9'}">
+          <input type="checkbox" class="chap-cb" ${isDone(e)?'checked':''} onchange="toggleTask('${e.id}',this.checked)"/>
+          <div class="chap-dot" style="background:${e.colour}"></div>
+          <div class="chap-body">
+            <div class="chap-name">${esc(e.subject)} — ${e.chapRange}
+              ${isDone(e)?'<span style="color:var(--green);font-weight:600;font-size:11px">✓ Done</span>':''}
+            </div>
+            ${buildChapterDiffLines(e)}
+          </div>
+          <span class="chap-type-badge ${e.type}">${cap(e.type)} (Next Day)</span>
+        </div>`;
+
+      document.getElementById('nextDayChecklist').innerHTML=nextEntries.length
+        ? nextEntries.map(renderNextEntry).join('')
+        : '<div class="empty"><p>No tasks found for the next day</p></div>';
+      nextDayPanel.classList.add('visible');
+    } else {
+      nextDayPanel.classList.remove('visible');
+    }
+  } else {
+    nextDayPanel.classList.remove('visible');
+  }
+}
+
+function toggleTask(id, checked){
+  setDone(id, checked);
+  renderTodayPage();
+  renderDashboard();
+  // Also update the study plan row if it exists there (for strikethrough sync)
+  const planRow=document.getElementById('planrow-'+id);
+  if(planRow){
+    if(checked){
+      planRow.classList.add('done');
+      const nm=planRow.querySelector('.chap-name');
+      if(nm&&!nm.querySelector('.done-lbl')){
+        const lbl=document.createElement('span');
+        lbl.className='done-lbl';
+        lbl.style.cssText='color:var(--green);font-weight:600;font-size:11px';
+        lbl.textContent='✓ Done';
+        nm.appendChild(lbl);
+      }
+    } else {
+      planRow.classList.remove('done');
+      const lbl=planRow.querySelector('.done-lbl');
+      if(lbl) lbl.remove();
+    }
+  }
+}
+
+function markAllToday(done){
+  const tStr=todayStr();
+  // Mark all entries for the currently active date (today + any stacked)
+  planData.allEntries.filter(e=>e.dateStr===tStr).forEach(e=>setDone(e.id,done));
+  renderTodayPage();renderDashboard();renderPlanTables();
+}
+
+// View tasks for a future day (navigates to study plan filtered to that date)
+function viewDayTasks(ds){
+  showPage('plan',document.querySelectorAll('.nav-item')[3]);
+  showToast('📅 Showing study plan — scroll to '+fmtShort(ds));
+  setTimeout(()=>{
+    const el=document.querySelector(`[id^="planrow-"]`);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  },300);
+}
+
+function endDay(){
+  const tStr=todayStr();  // uses active (possibly offset) date
+  dayTracker[tStr]=true;
+  save();
+  carryOverDay(tStr);
+  renderTodayPage();
+  renderPlanTables();
+  renderTrackerPage();
+  renderDashboard();
+  showToast('Day ended — unfinished tasks moved to next scheduled day');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DAILY TRACKER PAGE
+// ═══════════════════════════════════════════════════════════
+function renderTrackerPage(){
+  if(!planData){
+    document.getElementById('trackerNoData').style.display='block';
+    document.getElementById('trackerContent').style.display='none';
+    return;
+  }
+  document.getElementById('trackerNoData').style.display='none';
+  document.getElementById('trackerContent').style.display='block';
+
+  const tStr=todayStr();
+
+  // ── All-plan calendar grid (replaces week-only grid) ─────────────────────
+  // Get all unique study dates from plan
+  const allPlanDates=[...new Set(planData.allEntries
+    .filter(e=>e.dateStr>=tStr)
+    .map(e=>e.dateStr)
+  )].sort();
+
+  // Always include today even if no tasks
+  if(!allPlanDates.includes(tStr)) allPlanDates.push(tStr);
+  allPlanDates.sort();
+
+  // Update label to show full date range
+  const firstDate=allPlanDates[0];
+  const lastDate=allPlanDates[allPlanDates.length-1];
+  document.getElementById('weekLabel').textContent=
+    fmtDate(firstDate)+' – '+fmtDate(lastDate);
+
+  // Build a horizontal scrollable strip showing ALL plan days
+  const WEEK_DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  // Use the tracker-days container directly as a flex row
+  let calHTML='';
+  allPlanDates.forEach(ds=>{
+    const d=new Date(ds+'T00:00:00');
+    const isTodayDay=ds===tStr;
+    const isCompleted=dayTracker[ds];
+    const dayTasks=planData.allEntries.filter(e=>e.dateStr===ds);
+    const doneTasks=dayTasks.filter(e=>isDone(e)).length;
+    const monthShort=d.toLocaleDateString('en-IN',{month:'short'});
+
+    calHTML+=`<div class="tracker-day ${isTodayDay?'today-day':''} ${isCompleted?'completed-day':''}">
+      <div class="tracker-day-label">${WEEK_DAYS[d.getDay()]}</div>
+      <div style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:-2px">${monthShort}</div>
+      <div class="tracker-day-num" style="color:${isTodayDay?'var(--accent)':isCompleted?'var(--green)':'var(--text)'}">${d.getDate()}</div>
+      ${isCompleted
+        ? '<div class="completed-tick">✓</div>'
+        : `<input type="checkbox" class="tracker-day-check" onclick="toggleDayEnd('${ds}',this)" title="${isTodayDay?'End today':'Mark day'}"`+`>`
+      }
+      ${dayTasks.length?`<div style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace">${doneTasks}/${dayTasks.length}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('weeklyTracker').innerHTML=calHTML;
+  // Scroll today's cell into view
+  setTimeout(()=>{
+    const todayCell=document.querySelector('.tracker-day.today-day');
+    if(todayCell) todayCell.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  },100);
+
+  // Carryover notice
+  const carryoverNotice=document.getElementById('carryoverNotice');
+  const pendingYesterday=planData.allEntries.filter(e=>
+    e.dateStr===addDays(tStr,-1)&&!isDone(e)&&!e.isStacked
+  );
+  if(pendingYesterday.length&&!dayTracker[addDays(tStr,-1)]){
+    document.getElementById('carryoverMsg').textContent=
+      `${pendingYesterday.length} task(s) from yesterday not yet marked. End yesterday to carry them over.`;
+    carryoverNotice.style.display='flex';
+  } else {
+    carryoverNotice.style.display='none';
+  }
+
+  // ── Day-by-day summary — ALL plan days ───────────────────────────────────
+  const summaryEl=document.getElementById('trackerSummary');
+  let summaryHTML='';
+
+  const planDates=[...new Set(planData.allEntries.filter(e=>e.dateStr>=tStr).map(e=>e.dateStr))].sort();
+  planDates.forEach(ds=>{
+    const dayTasks=planData.allEntries.filter(e=>e.dateStr===ds);
+    if(!dayTasks.length) return;
+    const done=dayTasks.filter(e=>isDone(e)).length;
+    const isToday=ds===tStr;
+    const isPast=ds<tStr;
+    const isComplete=dayTracker[ds];
+
+    summaryHTML+=`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="min-width:100px;font-size:12px;font-family:'DM Mono',monospace;color:${isToday?'var(--accent)':isPast?'var(--muted)':'var(--text)'}">
+        ${fmtShort(ds)} ${isToday?'<span style="color:var(--accent)">(Today)</span>':''}
+      </div>
+      <div style="flex:1">
+        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${dayTasks.length?Math.round(done/dayTasks.length*100):0}%;background:${isComplete?'var(--green)':'var(--accent)'};border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;min-width:60px;text-align:right">${done}/${dayTasks.length}</div>
+      <div style="min-width:80px;text-align:right">
+        ${isComplete
+          ? '<span class="pill" style="background:var(--green-bg);color:var(--green)">✓ Done</span>'
+          : isToday
+            ? `<button class="btn-ghost btn-sm" style="font-size:11px" onclick="endDay()">End Day</button>`
+            : isPast
+              ? `<button class="btn-ghost btn-sm" style="font-size:11px" onclick="toggleDayEnd('${ds}',{checked:true})">Mark Done</button>`
+              : `<button class="btn-ghost btn-sm" style="font-size:11px" onclick="viewDayTasks('${ds}')">View Tasks</button>`
+        }
+      </div>
+    </div>`;
+  });
+
+  summaryEl.innerHTML=summaryHTML||'<div class="empty"><div class="empty-icon">📅</div><p>No study days in plan</p></div>';
+}
+
+function toggleDayEnd(ds, cbOrVal){
+  const checked=typeof cbOrVal==='object'?cbOrVal.checked:cbOrVal;
+  if(checked){
+    dayTracker[ds]=true;
+    save();
+    autoStackPastChapters();
+    showToast(`Day ${fmtShort(ds)} marked as complete — tasks carried over`);
+  } else {
+    delete dayTracker[ds];
+    save();
+    showToast('Day unmarked');
+  }
+  renderTrackerPage();
+  renderTodayPage();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDashboard(){
+  if(!planData||!subjects.length){
+    document.getElementById('dashNoData').style.display='block';
+    document.getElementById('dashContent').style.display='none';
+    return;
+  }
+  document.getElementById('dashNoData').style.display='none';
+  document.getElementById('dashContent').style.display='block';
+
+  const tStr=todayStr();
+  const todayEntries=planData.allEntries.filter(e=>e.dateStr===tStr);
+  const todayDone=todayEntries.filter(e=>isDone(e)).length;
+  const urgent=planData.enriched.filter(s=>s.daysLeft<=7).length;
+  const nextExam=planData.enriched.reduce((mn,s)=>s.daysLeft<mn?s.daysLeft:mn,9999);
+
+  document.getElementById('statSubjects').textContent=subjects.length;
+  document.getElementById('statExamDays').textContent=nextExam===9999?'—':nextExam+'d';
+  document.getElementById('statChapDone').textContent=`${todayDone}/${todayEntries.length}`;
+  document.getElementById('statUrgent').textContent=urgent;
+
+  // Deadline warnings
+  const dw=document.getElementById('deadlineWarnings');
+  dw.innerHTML=planData.enriched.filter(s=>s.daysLeft<=5).map(s=>`
+    <div class="deadline-strip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <b>${esc(s.name)}</b> exam in ${s.daysLeft} day${s.daysLeft!==1?'s':''}! Prioritize your hard chapters.
+    </div>`).join('');
+
+  // Charts
+  renderCharts();
+
+  // Upcoming exams
+  document.getElementById('upcomingExams').innerHTML=planData.enriched.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)">
+      <div style="width:10px;height:10px;border-radius:50%;background:${s.colour};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;font-family:'Syne',sans-serif">${esc(s.name)}</div>
+        <div style="font-size:11px;color:var(--muted)">${fmtDate(s.examDate)}</div>
+      </div>
+      <span style="font-size:12px;font-weight:600;color:${s.daysLeft<=7?'var(--red)':'var(--muted)'}">${s.daysLeft}d</span>
+    </div>`).join('');
+
+  // Difficulty breakdown
+  document.getElementById('syllabusCoverage').innerHTML=planData.enriched.map(s=>{
+    const diffs=s.chapDiffs||Array(s.chapters).fill(s.difficulty);
+    const easy=diffs.filter(d=>d==='easy').length;
+    const med=diffs.filter(d=>d==='medium').length;
+    const hard=diffs.filter(d=>d==='hard').length;
+    return `<div style="padding:11px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600;margin-bottom:7px;font-family:'Syne',sans-serif">${esc(s.name)}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${easy?`<span class="pill pill-easy">${easy} Easy</span>`:''}
+        ${med?`<span class="pill pill-medium">${med} Medium</span>`:''}
+        ${hard?`<span class="pill pill-hard">${hard} Hard</span>`:''}
+      </div>
+      <div style="margin-top:7px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;display:flex">
+        ${easy?`<div style="width:${Math.round(easy/diffs.length*100)}%;background:var(--easy);"></div>`:''}
+        ${med?`<div style="width:${Math.round(med/diffs.length*100)}%;background:var(--medium);"></div>`:''}
+        ${hard?`<div style="width:${Math.round(hard/diffs.length*100)}%;background:var(--hard);"></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCharts(){
+  if(!planData) return;
+
+  const tStr=todayStr();
+
+  // Load chart
+  const dateMap={};
+  planData.allEntries.filter(e=>e.dateStr>=tStr).forEach(e=>{
+    dateMap[e.dateStr]=(dateMap[e.dateStr]||0)+e.hours;
+  });
+  const dates=Object.keys(dateMap).sort().slice(0,14);
+  const loads=dates.map(d=>dateMap[d]);
+
+  if(chartLoad) chartLoad.destroy();
+  chartLoad=new Chart(document.getElementById('chartLoad'),{
+    type:'bar',
+    data:{
+      labels:dates.map(d=>fmtShort(d)),
+      datasets:[{
+        label:'Study Hours',
+        data:loads,
+        backgroundColor:dates.map(d=>d===tStr?'rgba(124,106,245,.9)':'rgba(124,106,245,.4)'),
+        borderColor:'rgba(124,106,245,1)',
+        borderWidth:1,borderRadius:4
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#6B7099',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},
+              y:{ticks:{color:'#6B7099'},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+
+  // Priority chart
+  if(chartPriority) chartPriority.destroy();
+  chartPriority=new Chart(document.getElementById('chartPriority'),{
+    type:'doughnut',
+    data:{
+      labels:planData.enriched.map(s=>s.name),
+      datasets:[{data:planData.enriched.map(s=>s.priority),backgroundColor:planData.enriched.map(s=>s.colour),borderWidth:0}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{color:'#E8EAF6',font:{size:11},padding:12}}}}
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PLAN TABLES
+// ═══════════════════════════════════════════════════════════
+function renderPlanTables(){
+  if(!planData){
+    document.getElementById('planNoData').style.display='block';
+    document.getElementById('planContent').style.display='none';
+    return;
+  }
+  document.getElementById('planNoData').style.display='none';
+  document.getElementById('planContent').style.display='block';
+
+  const tStr=todayStr();
+
+  // Group by date
+  const byDate={};
+  planData.allEntries.filter(e=>e.type==='study'&&e.dateStr>=tStr).forEach(e=>{
+    (byDate[e.dateStr]||(byDate[e.dateStr]=[])).push(e);
+  });
+
+  document.getElementById('studyPlanList').innerHTML=Object.entries(byDate).sort(([a],[b])=>a.localeCompare(b)).map(([ds,entries])=>{
+    const isToday=ds===tStr;const isPast=ds<tStr;
+    const doneCt=entries.filter(e=>isDone(e)).length;
+    const hasStacked=entries.some(e=>e.isStacked);
+    return `<div class="day-block">
+      <div class="day-block-hdr">
+        <span class="day-lbl">${entries[0].dayLabel}</span>
+        <span class="day-tag ${isToday?'today':isPast?'past':'future'}">${isToday?'Today':isPast?`${doneCt}/${entries.length} done`:'Upcoming'}</span>
+        ${hasStacked?`<span class="stacked-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Carryover</span>`:''}
+      </div>
+      ${entries.map(e=>`<div class="chap-row${isDone(e)?' done':''}${e.isStacked?' is-stacked':''}" id="planrow-${e.id}">
+        <div class="chap-dot" style="background:${e.colour}"></div>
+        <div class="chap-body">
+          <div class="chap-name">${esc(e.subject)} — ${e.chapRange}
+            ${e.isStacked?'<span class="pill pill-stacked">↩ Carried Over</span>':''}
+            ${isDone(e)?'<span style="color:var(--green);font-weight:600;font-size:11px">✓ Done</span>':''}
+          </div>
+          ${buildChapterDiffLines(e)}
+        </div>
+        <span class="chap-type-badge ${e.isStacked?'stacked':'study'}">${e.isStacked?'Carryover':'Study'}</span>
+      </div>`).join('')}
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">📅</div><p>No study days scheduled</p></div>';
+
+  const revByDate={};
+  planData.allEntries.filter(e=>e.type==='revision'&&e.dateStr>=tStr).forEach(e=>{
+    (revByDate[e.dateStr]||(revByDate[e.dateStr]=[])).push(e);
+  });
+
+  document.getElementById('revPlanList').innerHTML=Object.entries(revByDate).sort(([a],[b])=>a.localeCompare(b)).map(([ds,entries])=>{
+    const isToday=ds===tStr;const isPast=ds<tStr;
+    const doneCt=entries.filter(e=>isDone(e)).length;
+    const hasStacked=entries.some(e=>e.isStacked);
+    return `<div class="day-block">
+      <div class="day-block-hdr">
+        <span class="day-lbl">${entries[0].dayLabel}</span>
+        <span class="day-tag ${isToday?'today':isPast?'past':'future'}">${isToday?'Today':isPast?`${doneCt}/${entries.length} done`:'Upcoming'}</span>
+        ${hasStacked?`<span class="stacked-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Carryover</span>`:''}
+      </div>
+      ${entries.map(e=>`<div class="chap-row${isDone(e)?' done':''}${e.isStacked?' is-stacked':''}" id="planrow-${e.id}">
+        <div class="chap-dot" style="background:${e.colour}"></div>
+        <div class="chap-body">
+          <div class="chap-name">${esc(e.subject)} — ${e.chapRange}
+            ${e.isStacked?'<span class="pill pill-stacked">↩ Carried Over</span>':''}
+            ${isDone(e)?'<span style="color:var(--green);font-weight:600;font-size:11px">✓ Done</span>':''}
+          </div>
+        </div>
+        <span class="chap-type-badge ${e.isStacked?'stacked':'revision'}">${e.isStacked?'Carryover':'Revision'}</span>
+      </div>`).join('')}
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">📝</div><p>No revision slots</p></div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// INSIGHTS
+// ═══════════════════════════════════════════════════════════
+function renderInsights(){
+  if(!planData) return;
+  const ins=[];
+
+  // Top priority
+  const top=planData.enriched[0];
+  ins.push({type:'info',
+    title:`🎯 Top Priority: ${top.name}`,
+    msg:`Highest urgency score (${top.priority}). Focus here first — ${top.daysLeft} days to exam.`});
+
+  // Per subject
+  planData.enriched.forEach(s=>{
+    const chapDiffs=s.chapDiffs||Array(s.chapters).fill(s.difficulty);
+    const hardCount=chapDiffs.filter(d=>d==='hard').length;
+    const medCount=chapDiffs.filter(d=>d==='medium').length;
+
+    if(s.daysLeft<=7&&hardCount>0){
+      ins.push({type:'error',
+        title:`🔴 ${s.name} — Urgent with ${hardCount} Hard chapter${hardCount>1?'s':''}`,
+        msg:`Only ${s.daysLeft} days left. Focus on hard chapters immediately — they take the most time.`});
+    } else if(hardCount>0){
+      ins.push({type:'warn',
+        title:`⚡ ${s.name} — ${hardCount} Hard chapter${hardCount>1?'s':''}`,
+        msg:`Schedule extra time for hard chapters. ${medCount} medium chapter${medCount!==1?'s':''} also need attention.`});
+    } else {
+      ins.push({type:'success',
+        title:`✅ ${s.name} — ${s.chapters} chapters (mostly easy/medium)`,
+        msg:`Manageable workload. Stay consistent and don't skip revision.`});
+    }
+  });
+
+  // Exam clashes
+  const ed={};
+  planData.enriched.forEach(s=>{(ed[s.examDate]||(ed[s.examDate]=[])).push(s.name);});
+  Object.entries(ed).forEach(([dt,names])=>{
+    if(names.length>1) ins.push({type:'warn',
+      title:`⚡ Multiple exams on ${fmtDate(dt)}`,
+      msg:`${names.join(' & ')} on the same day — plan is split accordingly.`});
+  });
+
+  ins.push({type:'tip',
+    title:`💡 Daily Tracking Tip`,
+    msg:`Use the Daily Tracker to tick off each day. Unfinished tasks automatically carry over to the next day so nothing gets missed.`});
+
+  document.getElementById('insightsContent').innerHTML=ins.map(i=>`
+    <div class="insight ${i.type}">
+      <div style="font-weight:700;margin-bottom:5px;font-family:'Syne',sans-serif">${i.title}</div>
+      <div>${i.msg}</div>
+    </div>`).join('');
+
+  const badge=document.getElementById('insightBadge');
+  const warns=ins.filter(i=>i.type==='error'||i.type==='warn').length;
+  badge.textContent=warns;
+  badge.style.display=warns?'flex':'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLEAR
+// ═══════════════════════════════════════════════════════════
+function confirmClear(){document.getElementById('clearModal').classList.add('open');}
+function clearAllData(){
+  subjects=[];planData=null;completion={};dayTracker={};
+  ['sp_subjects','sp_plan','sp_completion','sp_daytracker'].forEach(k => localStorage.removeItem(k));
+  if(chartLoad){chartLoad.destroy();chartLoad=null;}
+  if(chartPriority){chartPriority.destroy();chartPriority=null;}
+  closeModal('clearModal');
+  document.getElementById('dashNoData').style.display='block';
+  document.getElementById('dashContent').style.display='none';
+  document.getElementById('todayNoData').style.display='block';
+  document.getElementById('todayContent').style.display='none';
+  document.getElementById('planNoData').style.display='block';
+  document.getElementById('planContent').style.display='none';
+  document.getElementById('trackerNoData').style.display='block';
+  document.getElementById('trackerContent').style.display='none';
+  document.getElementById('insightsContent').innerHTML='<div class="card" style="text-align:center;padding:48px"><div class="empty-icon">💡</div><p style="font-weight:600;font-size:15px;font-family:Syne,sans-serif">Generate a plan to see insights</p></div>';
+  ['insightBadge','todayBadge'].forEach(id=>document.getElementById(id).style.display='none');
+  renderSubjectsList();showToast('All data cleared');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAMPLE DATA
+// ═══════════════════════════════════════════════════════════
+// No auto-sample data — page always starts fresh per user request
+</script>
+</body>
+</html>
